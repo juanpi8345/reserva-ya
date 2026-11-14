@@ -1,0 +1,65 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: booking-service
+  datasource:
+    url: ${BD_URL:jdbc:postgresql://localhost:5432/booking_db}
+    username: ${BD_USER:postgres}
+    password: ${BD_PASSWORD:postgres}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Argentina/Buenos_Aires
+  jackson:
+    time-zone: America/Argentina/Buenos_Aires
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: 2s
+      timeout: 2s
+      config:
+        ttl-minutes: ${REDIS_CONFIG_TTL-MINUTES:10} 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: >-
+          booking-created:com.reservaya.booking_service.event.model.BookingCreatedEvent,
+          booking-cancelled:com.reservaya.booking_service.event.model.BookingCancelledEvent
+    consumer:
+      group-id: booking-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.reservaya.*
+        spring.json.type.mapping: payment:com.reservaya.booking_service.event.model.PaymentEvent
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+app:
+  kafka:
+    topics:
+      booking-created:
+        name: ${TOPIC_BOOKING_CREATED_NAME:booking.created}
+        partitions: ${TOPIC_BOOKING_CREATED_PARTITIONS:3}
+        replicas: ${TOPIC_BOOKING_CREATED_REPLICAS:1}
+      booking-cancelled:
+        name: ${TOPIC_BOOKING_CANCELLED_NAME:booking.cancelled}
+        partitions: ${TOPIC_BOOKING_CANCELLED_PARTITIONS:3}
+        replicas: ${TOPIC_BOOKING_CANCELLED_REPLICAS:1}
+      payment-approved:
+        name: ${TOPIC_PAYMENT_APPROVED_NAME:payment.approved}
+      payment-failed:
+        name: ${TOPIC_PAYMENT_FAILED_NAME:payment.failed}

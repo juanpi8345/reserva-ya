@@ -1,0 +1,5 @@
+package com.reservaya.notification_service.model;
+
+public enum NotificationStatus {
+    PENDING, SENT, FAILED
+}

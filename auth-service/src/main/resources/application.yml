@@ -1,0 +1,44 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${BD_URL}
+    username: ${BD_USER}
+    password: ${BD_PASSWORD}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Argentina/Buenos_Aires
+  jackson:
+    time-zone: America/Argentina/Buenos_Aires
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: user-created:com.reservaya.auth.event.model.UserCreatedEvent
+security:
+  jwt:
+    private:
+      key: ${JWT_KEY}
+    user:
+      generator: ${USER_GENERATOR}
+app:
+  kafka:
+    topics:
+      user-created:
+        name: ${TOPIC_USER_CREATED:user.created}
+        partitions: ${TOPIC_USER_CREATED_PARTITIONS:3}
+        replicas: ${TOPIC_USER_CREATED_REPLICAS:1}
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

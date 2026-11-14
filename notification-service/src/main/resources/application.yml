@@ -1,0 +1,70 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: ${BD_URL:jdbc:postgresql://localhost:5432/notification_db}
+    username: ${BD_USER:postgres}
+    password: ${BD_PASSWORD:postgres}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: 2s
+      timeout: 2s
+      config:
+        ttl-minutes: ${REDIS_CONFIG_TTL-MINUTES:10} 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.reservaya.*"
+        spring.json.type.mapping: >-
+          booking-created:com.reservaya.notification_service.event.model.BookingCreatedEvent,
+          booking-cancelled:com.reservaya.notification_service.event.model.BookingCancelledEvent,
+          payment:com.reservaya.notification_service.event.model.PaymentEvent,
+          user-created:com.reservaya.notification_service.event.model.UserCreatedEvent
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+aws:
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME:reservaya-email-templates}
+    region: ${AWS_REGION:us-east-1} 
+app:
+  mail:
+    from: ${MAIL_USERNAME:}
+  kafka:
+    topics:
+      user-created:
+        name: ${TOPIC_USER_CREATED_NAME:user.created}
+      booking-created:
+        name: ${TOPIC_BOOKING_CREATED_NAME:booking.created}
+      booking-cancelled:
+        name: ${TOPIC_BOOKING_CANCELLED_NAME:booking.cancelled}
+      payment-approved:
+        name: ${TOPIC_PAYMENT_APPROVED_NAME:payment.approved}
+      payment-failed:
+        name: ${TOPIC_PAYMENT_FAILED_NAME:payment.failed}
+    notification-group: notification-group

@@ -58,26 +58,6 @@ El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafk
 
 ---
 
-## 🚀 Scripts de Automatización y Pruebas End-to-End
-
-En el directorio **[`scripts/`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/scripts)** se encuentran disponibles scripts listos para ejecutar que cubren el ciclo de vida completo (registro, login, reserva, saga de pago y notificación):
-
-* **PowerShell (Recomendado en Windows):**
-  ```powershell
-  .\scripts\test_api.ps1
-  ```
-* **Command Prompt (Windows CMD):**
-  ```cmd
-  .\scripts\test_api.bat
-  ```
-* **Bash (Linux / macOS / Git Bash):**
-  ```bash
-  chmod +x scripts/test_api.sh
-  ./scripts/test_api.sh
-  ```
-
----
-
 ## 🏗️ Topología y Arquitectura de Kafka
 
 La plataforma incluye diagramas Draw.io exhaustivos para entornos de desarrollo y producción:
