@@ -1,6 +1,7 @@
 C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\ApiGatewayApplication.java
-C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\config\RouteConfig.java
 C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\exception\handler\GlobalExceptionHandler.java
+C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\security\config\filter\CustomRequestWrapper.java
+C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\security\config\filter\IpRateLimiterFilter.java
 C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\security\config\filter\JwtTokenValidator.java
 C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\security\config\SecurityConfig.java
 C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\api-gateway\src\main\java\com\reservaya\api_gateway\utils\JwtUtils.java

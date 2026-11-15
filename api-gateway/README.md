@@ -28,11 +28,70 @@ Punto de entrada único (Edge Service / Reverse Proxy) para el ecosistema **Rese
 
 ## ⚙️ Configuración (`application.yml`)
 
+Todas las propiedades de resiliencia y de red están parametrizadas con variables de entorno manteniendo sus valores por defecto actuales:
+
+| Propiedad / Variable de Entorno | Valor por Defecto | Descripción |
+|---|---|---|
+| `SERVER_PORT` | `8080` | Puerto HTTP del API Gateway |
+| `SPRING_THREADS_VIRTUAL_ENABLED` | `true` | Habilita Virtual Threads (Java 27 / Loom) |
+| `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` | `http://localhost:8761/eureka` | URL del registro Eureka |
+| `RESILIENCE4J_RATELIMITER_LIMIT_FOR_PERIOD` | `3` | Peticiones permitidas en la ventana |
+| `RESILIENCE4J_RATELIMITER_LIMIT_REFRESH_PERIOD` | `10s` | Ventana de refresco del Rate Limiter |
+| `RESILIENCE4J_RATELIMITER_TIMEOUT_DURATION` | `0s` | Espera máxima para adquirir permiso |
+| `RESILIENCE4J_TIMELIMITER_TIMEOUT_DURATION` | `5s` | Timeout de ejecución antes de cancelar |
+| `RESILIENCE4J_TIMELIMITER_CANCEL_RUNNING_FUTURE` | `true` | Cancela el future en caso de timeout |
+| `RESILIENCE4J_CIRCUITBREAKER_SLIDING_WINDOW_SIZE` | `10` | Ventana deslizante de peticiones a evaluar |
+| `RESILIENCE4J_CIRCUITBREAKER_FAILURE_RATE_THRESHOLD` | `50` | Porcentaje de fallos (%) para abrir circuito |
+| `RESILIENCE4J_CIRCUITBREAKER_WAIT_DURATION_IN_OPEN_STATE` | `5s` | Tiempo en estado abierto antes de half-open |
+| `LOG_LEVEL_GATEWAY` | `TRACE` | Nivel de logs para enrutamiento Gateway |
+| `LOG_LEVEL_WEB` | `INFO` | Nivel de logs para peticiones Web |
+
 * **Puerto:** `8080`
 * **Eureka Service URL:** `http://localhost:8761/eureka`
 * **Prefijo Global de Acceso:** `/api` (removido hacia los microservicios mediante `stripPrefix(1)`)
 
 ---
+
+## 🔀 Enrutamiento Declarativo en pplication.yml
+
+`yaml
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: auth-service
+            uri: lb://AUTH-SERVICE
+            predicates:
+              - Path=/api/auth/**
+            filters:
+              - StripPrefix=1
+              - CircuitBreaker=globalTimeLimiter
+
+          - id: booking-service
+            uri: lb://BOOKING-SERVICE
+            predicates:
+              - Path=/api/v1/bookings/**
+            filters:
+              - StripPrefix=1
+              - CircuitBreaker=globalTimeLimiter
+
+          - id: payment-service
+            uri: lb://PAYMENT-SERVICE
+            predicates:
+              - Path=/api/v1/payments/**
+            filters:
+              - StripPrefix=1
+              - CircuitBreaker=globalTimeLimiter
+
+          - id: notification-service
+            uri: lb://NOTIFICATION-SERVICE
+            predicates:
+              - Path=/api/v1/notifications/**
+            filters:
+              - StripPrefix=1
+              - CircuitBreaker=globalTimeLimiter
+`
 
 ## 🔀 Rutas y Reglas de Enrutamiento
 
@@ -101,7 +160,8 @@ curl -X GET "http://localhost:8080/api/v1/notifications" \
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 3.4.x**
+- **Java 27 / Spring Boot 4.1.2**
+- **Virtual Threads habilitados (spring.threads.virtual.enabled: true)**
 - **Spring Cloud Gateway Server MVC**
 - **Spring Cloud Netflix Eureka Client**
 - **Spring Security 6.x & Auth0 Java-JWT**

@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import com.reservaya.api_gateway.security.config.filter.IpRateLimiterFilter;
 import com.reservaya.api_gateway.security.config.filter.JwtTokenValidator;
 import com.reservaya.api_gateway.utils.JwtUtils;
 
@@ -18,9 +19,12 @@ import com.reservaya.api_gateway.utils.JwtUtils;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-	
+
 	@Autowired
 	private JwtUtils jwtUtils;
+
+	@Autowired
+	private IpRateLimiterFilter ipRateLimiterFilter;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -29,11 +33,12 @@ public class SecurityConfig {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 					    .requestMatchers("/api/auth", "/api/auth/**", "/error", "/fallback/**").permitAll()
-					    .requestMatchers(HttpMethod.GET,"/api/v1/bookings").hasRole("ADMIN")
-					    .requestMatchers(HttpMethod.GET,"/api/v1/payments").hasRole("ADMIN")
+					    .requestMatchers(HttpMethod.GET, "/api/v1/bookings").hasRole("ADMIN")
+					    .requestMatchers(HttpMethod.GET, "/api/v1/payments").hasRole("ADMIN")
 					    .anyRequest().authenticated()
 				)
-				.addFilterBefore(new JwtTokenValidator(jwtUtils), BasicAuthenticationFilter.class)
+				.addFilterBefore(ipRateLimiterFilter, BasicAuthenticationFilter.class)
+				.addFilterAfter(new JwtTokenValidator(jwtUtils), IpRateLimiterFilter.class)
 				.build();						
 	}
 }

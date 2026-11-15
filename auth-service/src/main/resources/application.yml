@@ -1,13 +1,15 @@
 server:
   port: 8085
-
 spring:
   application:
     name: auth-service
+  threads:
+    virtual:
+      enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
-    url: ${BD_URL}
-    username: ${BD_USER}
-    password: ${BD_PASSWORD}
+    url: ${BD_URL:jdbc:postgresql://localhost:5432/auth_db}
+    username: ${BD_USER:postgres}
+    password: ${BD_PASSWORD:postgres}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:

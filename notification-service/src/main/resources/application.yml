@@ -1,9 +1,11 @@
 server:
   port: 8083
-
 spring:
   application:
     name: notification-service
+  threads:
+    virtual:
+      enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
     url: ${BD_URL:jdbc:postgresql://localhost:5432/notification_db}
     username: ${BD_USER:postgres}

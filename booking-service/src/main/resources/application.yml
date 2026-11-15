@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: booking-service
+  threads:
+    virtual:
+      enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
     url: ${BD_URL:jdbc:postgresql://localhost:5432/booking_db}
     username: ${BD_USER:postgres}

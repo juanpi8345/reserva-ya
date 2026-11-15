@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.reservaya</groupId>
 	<artifactId>api-gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name />
 	<description />
 	<url />
@@ -29,7 +29,7 @@
 	</scm>
 	<properties>
 		<java.version>27</java.version>
-		<spring-cloud.version>2025.1.2</spring-cloud.version>
+		<spring-cloud.version>2025.1.4</spring-cloud.version>
 		<maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
 	</properties>
 	<dependencies>
@@ -140,3 +140,4 @@
 	</build>
 
 </project>
+

@@ -1,9 +1,44 @@
 server:
   port: 8080
-
 spring:
   application:
     name: api-gateway
+  threads:
+    virtual:
+      enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: auth-service
+              uri: lb://AUTH-SERVICE
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+                - CircuitBreaker=globalTimeLimiter
+            - id: booking-service
+              uri: lb://BOOKING-SERVICE
+              predicates:
+                - Path=/api/v1/bookings/**
+              filters:
+                - StripPrefix=1
+                - CircuitBreaker=globalTimeLimiter
+            - id: payment-service
+              uri: lb://PAYMENT-SERVICE
+              predicates:
+                - Path=/api/v1/payments/**
+              filters:
+                - StripPrefix=1
+                - CircuitBreaker=globalTimeLimiter
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/api/v1/notifications/**
+              filters:
+                - StripPrefix=1
+                - CircuitBreaker=globalTimeLimiter
 
 security:
   jwt:
@@ -11,37 +46,34 @@ security:
       key: ${JWT_KEY}
     user:
       generator: ${USER_GENERATOR}
-
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
   instance:
     prefer-ip-address: true
-
 logging:
   level:
-    org.springframework.cloud.gateway: TRACE
-    org.springframework.web: INFO
-
+    org.springframework.cloud.gateway: ${LOG_LEVEL_GATEWAY:TRACE}
+    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
 resilience4j:
   ratelimiter:
     configs:
       globalRateLimiter:
-        limit-for-period: 3
-        limit-refresh-period: 10s
-        timeout-duration: 0s
+        limit-for-period: ${RESILIENCE4J_RATELIMITER_LIMIT_FOR_PERIOD:3}
+        limit-refresh-period: ${RESILIENCE4J_RATELIMITER_LIMIT_REFRESH_PERIOD:10s}
+        timeout-duration: ${RESILIENCE4J_RATELIMITER_TIMEOUT_DURATION:0s}
     instances:
       globalRateLimiter:
         baseConfig: globalRateLimiter
   timelimiter:
     instances:
       globalTimeLimiter:
-        timeout-duration: 5s
-        cancel-running-future: true
+        timeout-duration: ${RESILIENCE4J_TIMELIMITER_TIMEOUT_DURATION:5s}
+        cancel-running-future: ${RESILIENCE4J_TIMELIMITER_CANCEL_RUNNING_FUTURE:true}
   circuitbreaker:
     instances:
       globalTimeLimiter:
-        sliding-window-size: 10
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 5s
+        sliding-window-size: ${RESILIENCE4J_CIRCUITBREAKER_SLIDING_WINDOW_SIZE:10}
+        failure-rate-threshold: ${RESILIENCE4J_CIRCUITBREAKER_FAILURE_RATE_THRESHOLD:50}
+        wait-duration-in-open-state: ${RESILIENCE4J_CIRCUITBREAKER_WAIT_DURATION_IN_OPEN_STATE:5s}

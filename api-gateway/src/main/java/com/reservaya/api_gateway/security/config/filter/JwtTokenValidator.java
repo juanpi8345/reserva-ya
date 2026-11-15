@@ -20,10 +20,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+public class JwtTokenValidator extends OncePerRequestFilter {
 
-public class JwtTokenValidator extends OncePerRequestFilter{
-
-	private JwtUtils jwtUtils;
+	private final JwtUtils jwtUtils;
 
 	public JwtTokenValidator(JwtUtils jwtUtils) {
 		super();
@@ -34,13 +33,24 @@ public class JwtTokenValidator extends OncePerRequestFilter{
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 		String jwtToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if(jwtToken != null && jwtToken.startsWith("Bearer ")) {
+		HttpServletRequest requestToPass = request;
+
+		if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
 			jwtToken = jwtToken.substring(7);
 			try {
 				DecodedJWT decodedJwt = jwtUtils.validateToken(jwtToken);
 				String username = jwtUtils.extractUsername(decodedJwt);
 				String authorities = jwtUtils.getSpecificClaim(decodedJwt, "authorities").asString();
-				Collection<? extends GrantedAuthority> authorityList = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities != null ? authorities : "");
+				Long userId = jwtUtils.getSpecificClaim(decodedJwt, "userId").asLong();
+
+				if (userId != null) {
+					CustomRequestWrapper wrapper = new CustomRequestWrapper(request);
+					wrapper.addHeader("X-User-Id", String.valueOf(userId));
+					requestToPass = wrapper;
+				}
+
+				Collection<? extends GrantedAuthority> authorityList = AuthorityUtils
+						.commaSeparatedStringToAuthorityList(authorities != null ? authorities : "");
 				SecurityContext context = SecurityContextHolder.getContext();
 				Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorityList);
 				context.setAuthentication(authentication);
@@ -49,7 +59,6 @@ public class JwtTokenValidator extends OncePerRequestFilter{
 				SecurityContextHolder.clearContext();
 			}
 		}
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(requestToPass, response);
 	}
-
 }
