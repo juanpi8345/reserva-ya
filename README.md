@@ -54,7 +54,7 @@ El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafk
 | **[`auth-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/auth-service/README.md)** | `8085` | PostgreSQL (`auth_db`) | Registro de usuarios, login, JWT y evento `user.created` |
 | **[`booking-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/booking-service/README.md)** | `8081` | PostgreSQL (`booking_db`) + Redis | Core de reservas, validación de fechas y Saga `booking.created` |
 | **[`payment-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/payment-service/README.md)** | `8082` | PostgreSQL (`payment_db`) | Cobro asíncrono, eventos `payment.approved` / `payment.failed` |
-| **[`notification-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/notification-service/README.md)** | `8083` | PostgreSQL (`notification_db`) + Redis + S3 | Patrón Strategy, templates S3 en caché y auditoría de emails |
+| **[`notification-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/notification-service/README.md)** | `8083` | PostgreSQL (`notification_db`) + Redis + S3 | Patrón Strategy, templates S3 en caché y envio de emails |
 
 ---
 
@@ -63,13 +63,13 @@ El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafk
 La plataforma incluye diagramas Draw.io exhaustivos para entornos de desarrollo y producción:
 
 * **Desarrollo:** [`doc/Kafka development architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Kafka%20development%20architecture.drawio) (3 particiones por tópico, productores y consumer groups).
-* **Producción (High Availability):** [`doc/Kafka production architecture .drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Kafka%20production%20architecture%20.drawio):
+* **Producción (High Availability):** [`doc/Kafka production architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Kafka%20production%20architecture%20.drawio):
   - **Cluster Multi-Broker:** 3 Brokers con **Replication Factor (RF) = 3**.
   - **Balanceo Leader/ISR:** Cero concentración de carga; réplicas en sincronía distribuidas uniformemente.
   - **Garantía Zero Data Loss:** `min.insync.replicas = 2` y productores con `acks = all` (`-1`).
   - **Escalabilidad Horizontal:** 5 particiones con 5 consumidores concurrentes en tópicos críticos (`booking.created`, `payment.approved`, `payment.failed`).
-* **Arquitectura de Alto Nivel:** [`doc/Diagrama alto nivel.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Diagrama%20alto%20nivel.drawio).
-* **Especificación de la Saga:** [`doc/arquitectura.md`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/arquitectura.md).
+* **Arquitectura de Alto Nivel:** [`doc/General architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/General%20architecture.drawio).
+* **Especificación de la Saga:** [`doc/architecture.md`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/architecture.md).
 
 ---
 

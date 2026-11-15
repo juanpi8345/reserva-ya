@@ -28,7 +28,7 @@ Punto de entrada único (Edge Service / Reverse Proxy) para el ecosistema **Rese
 
 ## ⚙️ Configuración (`application.yml`)
 
-Todas las propiedades de resiliencia y de red están parametrizadas con variables de entorno manteniendo sus valores por defecto actuales:
+Todas las propiedades de resiliencia y de red están parametrizadas con variables de entorno.
 
 | Propiedad / Variable de Entorno | Valor por Defecto | Descripción |
 |---|---|---|
@@ -52,7 +52,7 @@ Todas las propiedades de resiliencia y de red están parametrizadas con variable
 
 ---
 
-## 🔀 Enrutamiento Declarativo en pplication.yml
+## 🔀 Enrutamiento Declarativo en application.yml
 
 `yaml
 spring:
@@ -112,7 +112,7 @@ curl -X POST "http://localhost:8080/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "lucas_dev",
-    "password": "Password123*",
+    "password": "123456*",
     "email": "lucas@example.com",
     "phone": "+5491123456789"
   }'
@@ -124,7 +124,7 @@ curl -X POST "http://localhost:8080/api/auth" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "lucas_dev",
-    "password": "Password123*"
+    "password": "123456*"
   }'
 ```
 *Respuesta:*
