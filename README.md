@@ -133,7 +133,15 @@ La plataforma incluye diagramas exhaustivos para entornos de desarrollo y produc
 
 ---
 
-## 🐳 Levantar con Docker Compose (Paso a Paso)
+## 🐳 Despliegue Local con Docker Compose (Entorno de Pruebas y Desarrollo)
+
+> 💡 **Nota de Arquitectura:** Esta configuración de Docker Compose está diseñada exclusivamente para **desarrollo local, pruebas e integración rápida** en una sola máquina (utiliza un contenedor PostgreSQL unificado con bases lógicas y un Kafka Single-Broker con factor de replicación 1).  
+> 
+> Para un entorno de **Producción (Cloud / AWS)** se recomienda migrar la infraestructura hacia servicios administrados de Alta Disponibilidad:
+> - **Apache Kafka:** **AWS MSK** (Managed Streaming for Apache Kafka) con cluster multi-broker y Replication Factor = 3 (ver topología en [doc/Kafka production architecture.png](doc/Kafka%20production%20architecture.png)).
+> - **Bases de Datos:** **AWS RDS para PostgreSQL** (instancias Multi-AZ independientes por microservicio con backups automatizados).
+> - **Caché Distribuida:** **AWS ElastiCache para Redis** (con cluster mode / réplicas de lectura).
+> - **Orquestación:** Despliegue en **Amazon EKS** o **ECS (Fargate)**.
 
 ### Prerequisitos
 
