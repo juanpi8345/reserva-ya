@@ -8,6 +8,8 @@ Microservicio encargado del cobro y simulación de pagos asíncronos en la arqui
 
 1. **Consumo de Solicitudes de Cobro:**
    - Escucha el tópico `booking.created` mediante el grupo consumidor `payment-group`.
+
+> 📊 **Diagramas de Arquitectura:** Consultá la interacción en el flujo asíncrono en [General Architecture Diagram](../doc/General%20achitecture.png) y [Kafka Development Architecture](../doc/Kafka%20development%20architecture.png).
 2. **Procesamiento Asíncrono de Pagos:**
    - Evalúa el monto y procesa el cobro simulado.
    - Aplica validaciones de negocio: importes válidos resultan en `APPROVED`, mientras que casos borde o rechazos de pasarela derivan en `FAILED`.

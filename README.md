@@ -6,6 +6,8 @@ Plataforma escalable de reservas de hoteles y vuelos basada en **arquitectura de
 
 ## 🏛️ Arquitectura Global del Sistema
 
+![Arquitectura General](doc/General%20achitecture.png)
+
 El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafka para garantizar coherencia eventual entre servicios sin acoplamiento punto a punto.
 
 ```text
@@ -49,27 +51,37 @@ El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafk
 
 | Servicio | Puerto | Base de Datos / Storage | Descripción |
 |---|---|---|---|
-| **[`api-gateway`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/api-gateway/README.md)** | `8080` | Memoria (Resilience4j) | Reverse Proxy, Rate Limiter, validación JWT e inyección de `X-User-Id` |
-| **[`eureka-server`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/eureka-server/README.md)** | `8761` | Memoria | Dashboard y Registro dinámico de microservicios |
-| **[`auth-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/auth-service/README.md)** | `8085` | PostgreSQL (`auth_db`) | Registro de usuarios, login, JWT y evento `user.created` |
-| **[`booking-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/booking-service/README.md)** | `8081` | PostgreSQL (`booking_db`) + Redis | Core de reservas, validación de fechas y Saga `booking.created` |
-| **[`payment-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/payment-service/README.md)** | `8082` | PostgreSQL (`payment_db`) | Cobro asíncrono, eventos `payment.approved` / `payment.failed` |
-| **[`notification-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/notification-service/README.md)** | `8083` | PostgreSQL (`notification_db`) + Redis + S3 | Patrón Strategy, templates S3 en caché y envio de emails |
+| **[`api-gateway`](api-gateway/README.md)** | `8080` | Memoria (Resilience4j) | Reverse Proxy, Rate Limiter, validación JWT e inyección de `X-User-Id` |
+| **[`eureka-server`](eureka-server/README.md)** | `8761` | Memoria | Dashboard y Registro dinámico de microservicios |
+| **[`auth-service`](auth-service/README.md)** | `8085` | PostgreSQL (`auth_db`) | Registro de usuarios, login, JWT y evento `user.created` |
+| **[`booking-service`](booking-service/README.md)** | `8081` | PostgreSQL (`booking_db`) + Redis | Core de reservas, validación de fechas y Saga `booking.created` |
+| **[`payment-service`](payment-service/README.md)** | `8082` | PostgreSQL (`payment_db`) | Cobro asíncrono, eventos `payment.approved` / `payment.failed` |
+| **[`notification-service`](notification-service/README.md)** | `8083` | PostgreSQL (`notification_db`) + Redis + S3 | Patrón Strategy, templates S3 en caché y envio de emails |
 
 ---
 
 ## 🏗️ Topología y Arquitectura de Kafka
 
-La plataforma incluye diagramas Draw.io exhaustivos para entornos de desarrollo y producción:
+La plataforma incluye diagramas exhaustivos para entornos de desarrollo y producción:
 
-* **Desarrollo:** [`doc/Kafka development architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Kafka%20development%20architecture.drawio) (3 particiones por tópico, productores y consumer groups).
-* **Producción (High Availability):** [`doc/Kafka production architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/Kafka%20production%20architecture%20.drawio):
-  - **Cluster Multi-Broker:** 3 Brokers con **Replication Factor (RF) = 3**.
-  - **Balanceo Leader/ISR:** Cero concentración de carga; réplicas en sincronía distribuidas uniformemente.
-  - **Garantía Zero Data Loss:** `min.insync.replicas = 2` y productores con `acks = all` (`-1`).
-  - **Escalabilidad Horizontal:** 5 particiones con 5 consumidores concurrentes en tópicos críticos (`booking.created`, `payment.approved`, `payment.failed`).
-* **Arquitectura de Alto Nivel:** [`doc/General architecture.drawio`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/General%20architecture.drawio).
-* **Especificación de la Saga:** [`doc/architecture.md`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/doc/architecture.md).
+### Desarrollo (single-broker)
+
+![Kafka Arquitectura Desarrollo](doc/Kafka%20development%20architecture.png)
+
+* **3 particiones por tópico**, productores y consumer groups.
+* Archivo editable: [`doc/Kafka development architecture.drawio`](doc/Kafka%20development%20architecture.drawio)
+
+### Producción (High Availability)
+
+![Kafka Arquitectura Producción](doc/Kafka%20production%20architecture.png)
+
+* **Cluster Multi-Broker:** 3 Brokers con **Replication Factor (RF) = 3**.
+* **Balanceo Leader/ISR:** Cero concentración de carga; réplicas en sincronía distribuidas uniformemente.
+* **Garantía Zero Data Loss:** `min.insync.replicas = 2` y productores con `acks = all` (`-1`).
+* **Escalabilidad Horizontal:** 5 particiones con 5 consumidores concurrentes en tópicos críticos (`booking.created`, `payment.approved`, `payment.failed`).
+* Archivo editable: [`doc/Kafka production architecture.drawio`](doc/Kafka%20production%20architecture%20.drawio)
+
+**Especificación de la Saga:** [`doc/architecture.md`](doc/architecture.md).
 
 ---
 
@@ -94,7 +106,7 @@ La plataforma incluye diagramas Draw.io exhaustivos para entornos de desarrollo 
 | `GET` | `/api/v1/bookings` | Lista todas las reservas | `200 OK` + array |
 | `GET` | `/api/v1/bookings/user` | Reservas del usuario autenticado | `200 OK` + array |
 | `GET` | `/api/v1/bookings/{id}` | Detalle de una reserva | `200 OK` + objeto |
-| `DELETE` | `/api/v1/bookings/{id}` | Cancela reserva (dispara compensación Saga) | `204 No Content` |
+| `DELETE` | `/api/v1/bookings/{id}` | Cancela reserva (asíncrono vía Kafka) | `204 No Content` |
 
 **Tipos:** `resourceType` = `HOTEL` \| `FLIGHT` · `status` = `PENDING` \| `CONFIRMED` \| `PAYMENT_FAILED` \| `CANCELLED`
 
@@ -250,7 +262,7 @@ docker exec -it reservaya-postgres-1 psql -U postgres -d auth_db -c "SELECT id, 
 ```bash
 curl -s -X POST http://localhost:8080/api/auth \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"Admin123*"}'
+  -d '{"username":"admin","password":"123456*"}'
 ```
 
 Respuesta esperada:
@@ -332,8 +344,8 @@ Si tenés PostgreSQL instalado en tu máquina en lugar de usar Docker:
 
 ```powershell
 $env:PGPASSWORD = "tu_password"
-$psql = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
-$scripts = "C:\Users\SistemaxPC\Desktop\Proyectos\reservaYa\scripts\db"
+$psql = "psql" # o la ruta completa si no está en PATH
+$scripts = "scripts\db"
 
 # 1. Crear las bases de datos
 "auth_db", "booking_db", "payment_db", "notification_db" | ForEach-Object {

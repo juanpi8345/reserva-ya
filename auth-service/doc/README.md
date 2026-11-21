@@ -18,7 +18,7 @@ El servicio utiliza **PostgreSQL** con las siguientes tablas:
 ## 📜 Script Completo (Creación de Tablas + Carga de Datos)
 
 El archivo SQL completo se encuentra en:  
-[`auth-service/doc/init_auth_data.sql`](file:///C:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/auth-service/doc/init_auth_data.sql)
+[`auth-service/doc/init_auth_data.sql`](init_auth_data.sql)
 
 ```sql
 -- ====================================================================

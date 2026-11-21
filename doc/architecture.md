@@ -1,5 +1,9 @@
 # 🏨✈️ ReservaYa — Plataforma de Reservas Event-Driven
 
+## Arquitectura General
+
+![Arquitectura General](General%20achitecture.png)
+
 ## Descripción General
 
 **ReservaYa** es una plataforma de reservas de hoteles y vuelos que procesa reservas de forma asíncrona y orientada a eventos usando **Apache Kafka**.
@@ -49,18 +53,20 @@ El sistema está diseñado bajo principios de resiliencia, alta disponibilidad, 
 
 | Microservicio | Puerto | Base de Datos | Documentación Detallada |
 |---|---|---|---|
-| [`api-gateway`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/api-gateway/README.md) | `8080` | N/A | Validador JWT Fail-Fast, inyector de `X-User-Id`, enrutador Eureka |
-| [`eureka-server`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/eureka-server/README.md) | `8761` | N/A | Servidor de registro y descubrimiento de instancias |
-| [`auth-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/auth-service/README.md) | `8085` | `auth_db` | Registro, login, roles/permisos, JWT con claims de usuario |
-| [`booking-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/booking-service/README.md) | `8081` | `booking_db` | Creación y ciclo de vida de reservas, validación de fechas, caché Redis |
-| [`payment-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/payment-service/README.md) | `8082` | `payment_db` | Cobro asíncrono, simulación de transacciones, idempotencia |
-| [`notification-service`](file:///c:/Users/SistemaxPC/Desktop/Proyectos/reservaYa/notification-service/README.md) | `8083` | `notification_db` | Strategy Pattern, S3 templates, outbox de pendientes, envío de emails |
+| [`api-gateway`](../api-gateway/README.md) | `8080` | N/A | Validador JWT Fail-Fast, inyector de `X-User-Id`, enrutador Eureka |
+| [`eureka-server`](../eureka-server/README.md) | `8761` | N/A | Servidor de registro y descubrimiento de instancias |
+| [`auth-service`](../auth-service/README.md) | `8085` | `auth_db` | Registro, login, roles/permisos, JWT con claims de usuario |
+| [`booking-service`](../booking-service/README.md) | `8081` | `booking_db` | Creación y ciclo de vida de reservas, validación de fechas, caché Redis |
+| [`payment-service`](../payment-service/README.md) | `8082` | `payment_db` | Cobro asíncrono, simulación de transacciones, idempotencia |
+| [`notification-service`](../notification-service/README.md) | `8083` | `notification_db` | Strategy Pattern, S3 templates, outbox de pendientes, envío de emails |
 
 ---
 
 ## Patrones de Arquitectura Clave
 
 ### 1. Patrón Saga Coreografiada (Transacciones Distribuidas)
+
+![Kafka Arquitectura Desarrollo](Kafka%20development%20architecture.png)
 No existe un orquestador centralizado. Los servicios avanzan el flujo de negocio reaccionando autónomamente a los eventos de dominio:
 
 ```

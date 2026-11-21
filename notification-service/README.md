@@ -15,6 +15,8 @@ Microservicio enfocado en el procesamiento de eventos del dominio, auditoría de
 2. **Manejo de Out-of-Order Events (Outbox / Deferred Notifications):**
    - Resuelve condiciones de carrera en Kafka cuando un evento de pago o cancelación llega antes de que el usuario o la reserva estén registrados localmente.
    - Persiste la notificación en estado `PENDING` con su `payload` JSON en la base de datos para procesamiento posterior sin pérdida de mensajes.
+
+> 📊 **Diagramas de Arquitectura:** Consultá la interacción en el flujo asíncrono en [General Architecture Diagram](../doc/General%20achitecture.png) y [Kafka Development Architecture](../doc/Kafka%20development%20architecture.png).
 3. **Plantillas HTML en AWS S3 con Caché Redis:**
    - Descarga dinámica de plantillas (`welcome.html`, `booking_created.html`, `payment_approved.html`, `payment_failed.html`, `booking_cancelled.html`) desde bucket S3.
    - Caché de alto rendimiento con `@Cacheable(value = "emailTemplates", key = "#templateName")` implementado en `TemplateStorageService` para evitar I/O redundante hacia S3.

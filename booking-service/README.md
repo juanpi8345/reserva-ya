@@ -17,6 +17,8 @@ Microservicio central (Core de Negocio) encargado de la gestión de reservas de 
    - Escucha los tópicos `payment.approved` y `payment.failed`.
    - Si el pago es aprobado, actualiza el estado de la reserva a `CONFIRMED`.
    - Si el pago falla, actualiza el estado a `CANCELLED` y libera el recurso.
+
+> 📊 **Diagramas de Arquitectura:** Consultá el flujo de Saga e integración con Kafka en [General Architecture Diagram](../doc/General%20achitecture.png) y [Kafka Development Architecture](../doc/Kafka%20development%20architecture.png).
 5. **Caché Distribuida con Redis:**
    - Caché en lecturas frecuentes (`@Cacheable(value = "bookings")`) y desalojo automático ante cancelaciones y cambios de estado (`@CacheEvict`).
 
