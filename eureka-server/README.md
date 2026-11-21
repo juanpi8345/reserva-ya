@@ -32,5 +32,5 @@ Allí se visualizan:
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 3.4.x**
+- **Java 17 / Spring Boot 4.1.0**
 - **Spring Cloud Netflix Eureka Server**

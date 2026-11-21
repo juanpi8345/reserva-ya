@@ -117,7 +117,7 @@ curl -s "http://localhost:8080/api/v1/payments/c48f293b-18a7-4b68-98e6-d98c362a7
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 3.4.x**
+- **Java 27 / Spring Boot 4.1.2**
 - **Spring Data JPA & PostgreSQL**
 - **Spring Kafka (Producer & Consumer)**
 - **Netflix Eureka Client**

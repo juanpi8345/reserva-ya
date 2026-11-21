@@ -42,6 +42,46 @@ Microservicio enfocado en el procesamiento de eventos del dominio, auditoría de
 
 ---
 
+## ☁️ Plantillas de Correo en AWS S3
+
+El microservicio descarga dinámicamente los templates HTML desde el bucket configurado en `AWS_S3_BUCKET_NAME` (clave esperada en S3: `<templateName>.html`).
+
+Las plantillas base se encuentran en el proyecto en:
+📂 `notification-service/src/main/resources/email-templates/`
+
+| Archivo Template | Clave S3 | Evento que lo dispara |
+|---|---|---|
+| `booking_created.html` | `booking_created.html` | Al recibir `booking.created` (esperando pago) |
+| `payment_approved.html` | `payment_approved.html` | Al recibir `payment.approved` (reserva confirmada) |
+| `payment_failed.html` | `payment_failed.html` | Al recibir `payment.failed` (pago rechazado) |
+| `booking_cancelled.html` | `booking_cancelled.html` | Al recibir `booking.cancelled` (reserva cancelada) |
+
+### 🚀 Cómo crear el Bucket y subir los templates con AWS CLI
+
+Si estás configurando tu entorno o AWS por primera vez:
+
+```bash
+# 1. Crear el bucket en la región deseada (ejemplo: us-east-1)
+aws s3 mb s3://tu_bucket_s3 --region us-east-1
+
+# 2. Subir todos los templates HTML desde la carpeta de resources
+cd notification-service/src/main/resources/email-templates
+aws s3 cp . s3://tu_bucket_s3/ --recursive --exclude "*" --include "*.html"
+
+# 3. Verificar que los archivos quedaron en la raíz del bucket
+aws s3 ls s3://tu_bucket_s3/
+```
+
+> **En PowerShell:**
+> ```powershell
+> aws s3 mb s3://tu_bucket_s3 --region us-east-1
+> Get-ChildItem .\src\main\resources\email-templates\*.html | ForEach-Object {
+>     aws s3 cp $_.FullName "s3://tu_bucket_s3/$($_.Name)"
+> }
+> ```
+
+---
+
 ## 🔀 Endpoints Expuestos
 
 | Método | Endpoint | Headers Requeridos | Descripción |
@@ -100,7 +140,7 @@ curl -s "http://localhost:8080/api/v1/notifications" \
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 3.4.x**
+- **Java 27 / Spring Boot 4.1.2**
 - **Spring Data JPA & PostgreSQL**
 - **Spring Data Redis (Caché de templates S3)**
 - **AWS SDK v2 (S3 Client)**

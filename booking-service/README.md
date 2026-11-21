@@ -169,7 +169,7 @@ curl -s -X DELETE "http://localhost:8080/api/v1/bookings/c48f293b-18a7-4b68-98e6
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 3.4.x**
+- **Java 27 / Spring Boot 4.1.2**
 - **Spring Data JPA & PostgreSQL**
 - **Spring Data Redis (Caché)**
 - **Spring Kafka (Producer & Consumer)**

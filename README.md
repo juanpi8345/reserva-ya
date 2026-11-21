@@ -167,6 +167,12 @@ AWS_S3_BUCKET_NAME=tu_bucket_s3
 AWS_REGION=us-east-1
 ```
 
+> **Nota sobre los templates en S3:** Antes o después de levantar, recordá crear el bucket y cargar las plantillas HTML que utiliza `notification-service` (ubicadas en `notification-service/src/main/resources/email-templates/`):
+> ```bash
+> aws s3 mb s3://tu_bucket_s3 --region us-east-1
+> aws s3 cp notification-service/src/main/resources/email-templates/ s3://tu_bucket_s3/ --recursive
+> ```
+
 > **Nunca commitees el `.env` al repositorio.** Ya está en el `.gitignore`.
 
 ---

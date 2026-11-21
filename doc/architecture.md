@@ -15,7 +15,7 @@ El sistema está diseñado bajo principios de resiliencia, alta disponibilidad, 
 
 | Tecnología | Rol |
 |---|---|
-| **Java 27 / Spring Boot 3.x / 4.x** | Framework base de cada microservicio |
+| **Java 27 / Spring Boot 4.1.x** | Framework base de cada microservicio |
 | **Spring Cloud Eureka** | Service Discovery (Registro y descubrimiento de servicios) |
 | **Spring Cloud Gateway (MVC)** | API Gateway (Perímetro de seguridad, Fail-Fast JWT, inyección de `X-User-Id`) |
 | **Spring Security + JWT** | Autenticación y Autorización stateless |
