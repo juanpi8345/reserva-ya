@@ -82,6 +82,26 @@ aws s3 ls s3://tu_bucket_s3/
 
 ---
 
+## 📧 Configuración de Correo SMTP
+
+El microservicio utiliza **JavaMailSender** con TLS (`smtp.gmail.com:587` por defecto) para el envío de emails con los templates renderizados.
+
+### Variables de entorno
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `MAIL_HOST` | Servidor SMTP | `smtp.gmail.com` |
+| `MAIL_PORT` | Puerto TLS | `587` |
+| `MAIL_USERNAME` | Tu cuenta de correo remitente | `tu_correo@gmail.com` |
+| `MAIL_PASSWORD` | Contraseña de aplicación generada | `abcd efgh ijkl mnop` |
+
+> ⚠️ **Importante con Gmail:** No debes usar la contraseña habitual de tu cuenta de Google. Debes generar una **Contraseña de Aplicación (App Password)** de 16 caracteres:
+> 1. Activa la **Verificación en 2 pasos** en tu cuenta de Google (*Gestionar tu cuenta de Google > Seguridad*).
+> 2. Busca **"Contraseñas de aplicaciones"** en el buscador de la cuenta.
+> 3. Asígnale un nombre (ej. `ReservaYa`) y pulsa **Crear**.
+> 4. Copia la clave de 16 caracteres resultante y colócala en `MAIL_PASSWORD`.
+
+---
+
 ## 🔀 Endpoints Expuestos
 
 | Método | Endpoint | Headers Requeridos | Descripción |

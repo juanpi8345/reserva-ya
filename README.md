@@ -167,7 +167,16 @@ USER_GENERATOR=auth-service
 # ─── Mail (SMTP para Notifications) ───────────────────────────
 MAIL_USERNAME=tu-email@gmail.com
 MAIL_PASSWORD=tu-app-password-de-gmail
+```
 
+> 💡 **Cómo generar la contraseña de Gmail para SMTP:**  
+> Gmail no permite usar tu contraseña habitual. Debes generar una **Contraseña de Aplicación (App Password)** de 16 caracteres:  
+> 1. En tu cuenta de Google, ve a *Seguridad* y asegúrate de tener activada la **Verificación en 2 pasos**.  
+> 2. Busca **"Contraseñas de aplicaciones"** en el buscador de la cuenta.  
+> 3. Escribe un nombre descriptivo (ej: `ReservaYa`) y pulsa **Crear**.  
+> 4. Pega la clave de 16 caracteres generada en `MAIL_PASSWORD`.
+
+```env
 # ─── AWS S3 (Templates de notificaciones) ─────────────────────
 AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
