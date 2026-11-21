@@ -262,7 +262,7 @@ docker exec -it reservaya-postgres-1 psql -U postgres -d auth_db -c "SELECT id, 
 ```bash
 curl -s -X POST http://localhost:8080/api/auth \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"123456*"}'
+  -d '{"username":"admin","password":"123456"}'
 ```
 
 Respuesta esperada:
