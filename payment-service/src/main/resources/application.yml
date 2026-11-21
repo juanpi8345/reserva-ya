@@ -7,7 +7,7 @@ spring:
     virtual:
       enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
-    url: ${BD_URL:jdbc:postgresql://localhost:5432/payment_db}
+    url: ${BD_URL:jdbc:postgresql://postgres:5432/payment_db}
     username: ${BD_USER:postgres}
     password: ${BD_PASSWORD:postgres}
   jpa:
@@ -22,14 +22,14 @@ spring:
     time-zone: America/Argentina/Buenos_Aires
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
       connect-timeout: 2s
       timeout: 2s
       config:
         ttl-minutes: ${REDIS_CONFIG_TTL-MINUTES:10} 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -46,7 +46,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka
   instance:
     prefer-ip-address: true
 app:

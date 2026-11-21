@@ -1,14 +1,13 @@
+
 #!/bin/bash
 # ========================================================
 # Inicializa todas las bases de datos de ReservaYa en PostgreSQL
 # ========================================================
-DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-5432}"
-DB_USER="${DB_USER:-postgres}"
+BD_USER="${POSTGRES_USER:-${BD_USER:-postgres}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "=========================================================="
-echo " Inicializando Bases de Datos de ReservaYa en $DB_HOST:$DB_PORT"
+echo " Inicializando Bases de Datos de ReservaYa"
 echo "=========================================================="
 
 DATABASES=("auth_db" "booking_db" "payment_db" "notification_db")
@@ -20,13 +19,15 @@ FILES=(
 )
 
 for i in "${!DATABASES[@]}"; do
-  DB="${DATABASES[$i]}"
+  BD="${DATABASES[$i]}"
   FILE="${FILES[$i]}"
-  echo -e "\nCreando base de datos si no existe: $DB..."
-  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -c "CREATE DATABASE $DB;" 2>/dev/null || true
 
-  echo "Ejecutando $FILE en $DB..."
-  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB" -f "$FILE"
+  echo -e "\nCreando base de datos si no existe: $BD..."
+
+  psql -U "$BD_USER" -d postgres -c "CREATE DATABASE $BD;" 2>/dev/null || true
+
+  echo "Ejecutando $FILE en $BD..."
+  psql -U "$BD_USER" -d "$BD" -f "$FILE"
 done
 
 echo -e "\n=========================================================="

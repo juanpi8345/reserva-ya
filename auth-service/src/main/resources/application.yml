@@ -7,7 +7,7 @@ spring:
     virtual:
       enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
-    url: ${BD_URL:jdbc:postgresql://localhost:5432/auth_db}
+    url: ${BD_URL:jdbc:postgresql://postgres:5432/auth_db}
     username: ${BD_USER:postgres}
     password: ${BD_PASSWORD:postgres}
   jpa:
@@ -21,7 +21,7 @@ spring:
   jackson:
     time-zone: America/Argentina/Buenos_Aires
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -30,9 +30,9 @@ spring:
 security:
   jwt:
     private:
-      key: ${JWT_KEY}
+      key: ${JWT_KEY:}
     user:
-      generator: ${USER_GENERATOR}
+      generator: ${USER_GENERATOR:}
 app:
   kafka:
     topics:
@@ -43,4 +43,4 @@ app:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka

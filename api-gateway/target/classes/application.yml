@@ -39,17 +39,16 @@ spring:
               filters:
                 - StripPrefix=1
                 - CircuitBreaker=globalTimeLimiter
-
 security:
   jwt:
     private:
-      key: ${JWT_KEY}
+      key: ${JWT_KEY:}
     user:
-      generator: ${USER_GENERATOR}
+      generator: ${USER_GENERATOR:}
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka}
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
   instance:
     prefer-ip-address: true
 logging:

@@ -7,7 +7,7 @@ spring:
     virtual:
       enabled: ${SPRING_THREADS_VIRTUAL_ENABLED:true}
   datasource:
-    url: ${BD_URL:jdbc:postgresql://localhost:5432/notification_db}
+    url: ${BD_URL:jdbc:postgresql://postgres:5432/notification_db}
     username: ${BD_USER:postgres}
     password: ${BD_PASSWORD:postgres}
   jpa:
@@ -16,7 +16,7 @@ spring:
       ddl-auto: update
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
       connect-timeout: 2s
       timeout: 2s
@@ -31,7 +31,7 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     consumer:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -43,16 +43,15 @@ spring:
           booking-cancelled:com.reservaya.notification_service.event.model.BookingCancelledEvent,
           payment:com.reservaya.notification_service.event.model.PaymentEvent,
           user-created:com.reservaya.notification_service.event.model.UserCreatedEvent
-
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
   instance:
     prefer-ip-address: true
 aws:
   s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME:reservaya-email-templates}
+    bucket-name: ${AWS_S3_BUCKET_NAME:}
     region: ${AWS_REGION:us-east-1} 
 app:
   mail:

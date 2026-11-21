@@ -30,6 +30,8 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
 				.csrf(csrf -> csrf.disable())
+			    .httpBasic(basic -> basic.disable())
+			    .formLogin(form -> form.disable())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 					    .requestMatchers("/api/auth", "/api/auth/**", "/error", "/fallback/**").permitAll()
