@@ -122,7 +122,7 @@ curl -s -X POST "http://localhost:8080/api/auth" \
 ---
 
 ## 🛠️ Stack Tecnológico
-- **Java 27 / Spring Boot 4.1.1**
+- **Java 27 / Spring Boot 4.1.2**
 - **Spring Data JPA & PostgreSQL Driver**
 - **Spring Security 6.x (BCrypt, Stateless)**
 - **Auth0 Java-JWT**
