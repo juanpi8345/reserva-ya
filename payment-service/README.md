@@ -42,41 +42,61 @@ Microservicio encargado del cobro y simulación de pagos asíncronos en la arqui
 
 ---
 
-## 📡 Ejemplos de Peticiones y Respuestas
+## 📡 Endpoints y Ejemplos
 
-### 1. Listar Todos los Pagos (`GET /api/v1/payments`)
-**Request:**
+> Todos los endpoints requieren `Authorization: Bearer <jwt>`.
+> Los pagos **no se crean manualmente** — se generan automáticamente al consumir el evento `booking.created` de Kafka.
+
+---
+
+### `GET /api/v1/payments` — Auditoría de todos los pagos
+
 ```bash
-curl -X GET "http://localhost:8080/api/v1/payments" \
-  -H "Authorization: Bearer <TOKEN_JWT>"
+curl -s "http://localhost:8080/api/v1/payments" \
+  -H "Authorization: Bearer <jwt>"
 ```
-**Respuesta:** `200 OK`
+
+**Respuesta `200 OK`:**
 ```json
 [
   {
-    "id": "e7b1a2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+    "paymentId": "e7b1a2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
     "bookingId": "c48f293b-18a7-4b68-98e6-d98c362a7b8e",
+    "userId": 1,
     "amount": 320.00,
-    "status": "APPROVED",
-    "createdAt": "2026-11-14T15:15:00"
+    "paymentStatus": "APPROVED",
+    "proccessedAt": "2026-11-20T09:31:05"
   }
 ]
 ```
 
-### 2. Consultar Pago por Booking ID (`GET /api/v1/payments/{bookingId}`)
-**Request:**
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `paymentId` | `UUID` | ID del registro de pago |
+| `bookingId` | `UUID` | ID de la reserva asociada |
+| `userId` | `Long` | ID del usuario |
+| `amount` | `BigDecimal` | Monto procesado |
+| `paymentStatus` | `Enum` | `APPROVED` \| `FAILED` |
+| `proccessedAt` | `LocalDateTime` | Timestamp de procesamiento (`yyyy-MM-dd'T'HH:mm:ss`) |
+
+---
+
+### `GET /api/v1/payments/{bookingId}` — Pago de una reserva específica
+
 ```bash
-curl -X GET "http://localhost:8080/api/v1/payments/c48f293b-18a7-4b68-98e6-d98c362a7b8e" \
-  -H "Authorization: Bearer <TOKEN_JWT>"
+curl -s "http://localhost:8080/api/v1/payments/c48f293b-18a7-4b68-98e6-d98c362a7b8e" \
+  -H "Authorization: Bearer <jwt>"
 ```
-**Respuesta:** `200 OK`
+
+**Respuesta `200 OK`:**
 ```json
 {
-  "id": "e7b1a2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "paymentId": "e7b1a2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
   "bookingId": "c48f293b-18a7-4b68-98e6-d98c362a7b8e",
+  "userId": 1,
   "amount": 320.00,
-  "status": "APPROVED",
-  "createdAt": "2026-11-14T15:15:00"
+  "paymentStatus": "APPROVED",
+  "proccessedAt": "2026-11-20T09:31:05"
 }
 ```
 

@@ -47,13 +47,30 @@ Microservicio central (Core de Negocio) encargado de la gestión de reservas de 
 
 ---
 
-## 📡 Ejemplos de Peticiones y Respuestas
+## 📡 Endpoints y Ejemplos
 
-### 1. Crear Reserva (`POST /api/v1/bookings`)
-**Request:**
+> Todos los endpoints requieren `Authorization: Bearer <jwt>`.
+> El header `X-User-Id` es inyectado automáticamente por el API Gateway — no enviarlo manualmente.
+
+---
+
+### `POST /api/v1/bookings` — Crear reserva
+
+Publica el evento `booking.created` en Kafka y persiste la reserva en estado `PENDING`. **Respuesta asíncrona: `202 ACCEPTED`.**
+
+**Request Body:**
+
+| Campo | Tipo | Validaciones |
+|---|---|---|
+| `resourceType` | `Enum` | Requerido. `HOTEL` \| `FLIGHT` |
+| `resourceId` | `UUID` | Requerido. ID del hotel o vuelo |
+| `checkIn` | `LocalDateTime` | Requerido. Formato `yyyy-MM-dd'T'HH:mm:ss`. Hoy o futuro |
+| `checkOut` | `LocalDateTime` | Requerido. Formato `yyyy-MM-dd'T'HH:mm:ss`. Debe ser futuro |
+| `totalAmount` | `BigDecimal` | Requerido. Mínimo `0.01`, máximo 10 enteros y 2 decimales |
+
 ```bash
-curl -X POST "http://localhost:8080/api/v1/bookings" \
-  -H "Authorization: Bearer <TOKEN_JWT>" \
+curl -s -X POST "http://localhost:8080/api/v1/bookings" \
+  -H "Authorization: Bearer <jwt>" \
   -H "Content-Type: application/json" \
   -d '{
     "resourceType": "HOTEL",
@@ -63,44 +80,89 @@ curl -X POST "http://localhost:8080/api/v1/bookings" \
     "totalAmount": 320.00
   }'
 ```
-**Respuesta:** `202 ACCEPTED`
+
+**Respuesta `202 ACCEPTED`:**
 ```json
 {
   "bookingId": "c48f293b-18a7-4b68-98e6-d98c362a7b8e",
-  "status": "PENDING",
-  "message": "Booking request received. Processing payment asynchronously."
+  "status": "PENDING"
 }
 ```
 
-### 2. Consultar Reservas del Usuario (`GET /api/v1/bookings/user`)
-**Request:**
+---
+
+### `GET /api/v1/bookings` — Listar todas las reservas
+
 ```bash
-curl -X GET "http://localhost:8080/api/v1/bookings/user" \
-  -H "Authorization: Bearer <TOKEN_JWT>"
+curl -s "http://localhost:8080/api/v1/bookings" \
+  -H "Authorization: Bearer <jwt>"
 ```
-**Respuesta:** `200 OK`
+
+**Respuesta `200 OK`:**
 ```json
 [
   {
     "id": "c48f293b-18a7-4b68-98e6-d98c362a7b8e",
-    "userId": 12,
-    "resourceType": "HOTEL",
+    "userId": 1,
     "resourceId": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+    "resourceType": "HOTEL",
     "checkIn": "2026-12-01T14:00:00",
     "checkOut": "2026-12-05T10:00:00",
     "totalAmount": 320.00,
-    "status": "CONFIRMED"
+    "status": "CONFIRMED",
+    "createdAt": "2026-11-20T09:30:00",
+    "updatedAt": "2026-11-20T09:31:05"
   }
 ]
 ```
 
-### 3. Cancelar Reserva (`DELETE /api/v1/bookings/{id}`)
-**Request:**
+#### Estados posibles (`status`)
+
+| Valor | Descripción |
+|---|---|
+| `PENDING` | Reserva publicada en Kafka, esperando resultado del pago |
+| `CONFIRMED` | Pago aprobado (`payment.approved` consumido) |
+| `PAYMENT_FAILED` | Pago rechazado (`payment.failed` consumido) |
+| `CANCELLED` | Cancelada manualmente por el usuario |
+
+---
+
+### `GET /api/v1/bookings/user` — Reservas del usuario autenticado
+
+Filtra por `X-User-Id` inyectado por el Gateway.
+
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/bookings/c48f293b-18a7-4b68-98e6-d98c362a7b8e" \
-  -H "Authorization: Bearer <TOKEN_JWT>"
+curl -s "http://localhost:8080/api/v1/bookings/user" \
+  -H "Authorization: Bearer <jwt>"
 ```
-**Respuesta:** `204 NO CONTENT`
+
+Mismo formato de respuesta que `GET /api/v1/bookings`.
+
+---
+
+### `GET /api/v1/bookings/{id}` — Detalle de una reserva
+
+```bash
+curl -s "http://localhost:8080/api/v1/bookings/c48f293b-18a7-4b68-98e6-d98c362a7b8e" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+Mismo formato de objeto de respuesta que el array anterior.
+
+---
+
+### `DELETE /api/v1/bookings/{id}` — Cancelar reserva
+
+Publica el evento `booking.cancelled` en Kafka. Respuesta `204 NO CONTENT`.
+
+```bash
+curl -s -X DELETE "http://localhost:8080/api/v1/bookings/c48f293b-18a7-4b68-98e6-d98c362a7b8e" \
+  -H "Authorization: Bearer <jwt>"
+```
+
+| Código | Descripción |
+|---|---|
+| `204 No Content` | Evento de cancelación publicado — compensación asíncrona en curso |
 
 ---
 

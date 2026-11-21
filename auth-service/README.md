@@ -33,41 +33,76 @@ Microservicio responsable de la autenticación, autorización, gestión de usuar
 
 ---
 
-## 📡 Ejemplos de Peticiones y Respuestas
+## 📡 Endpoints y Ejemplos
 
-### 1. Registrar Usuario (`POST /auth/register`)
-**Request:**
+### `POST /api/auth/register` — Registrar usuario
+
+**No requiere JWT.**
+
+**Request Body:**
+
+| Campo | Tipo | Validaciones |
+|---|---|---|
+| `username` | `String` | Requerido, 3–30 caracteres |
+| `password` | `String` | Requerido, 8–72 caracteres |
+| `email` | `String` | Requerido, formato email válido |
+| `phone` | `String` | Requerido, formato `^\\+?[0-9]{8,15}$` |
+
 ```bash
-curl -X POST "http://localhost:8080/api/auth/register" \
+curl -s -X POST "http://localhost:8080/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "martin_perez",
-    "password": "SecurePassword123*",
-    "email": "martin@example.com",
-    "phone": "+5491144445555"
+    "username": "juan_perez",
+    "password": "MiPassword1*",
+    "email": "juan@gmail.com",
+    "phone": "+5491112345678"
   }'
 ```
-**Respuesta:** `200 OK` (Cuerpo vacío)
 
-### 2. Iniciar Sesión (`POST /auth`)
-**Request:**
+| Código | Body | Descripción |
+|---|---|---|
+| `200 OK` | *(vacío)* | Usuario registrado. Se publica `user.created` en Kafka |
+| `400 Bad Request` | `{"status":"BAD_REQUEST","message":"..."}` | Validación fallida |
+| `409 Conflict` | `{"status":"CONFLICT","message":"..."}` | Username ya registrado |
+
+---
+
+### `POST /api/auth` — Login (obtener JWT)
+
+**No requiere JWT.**
+
 ```bash
-curl -X POST "http://localhost:8080/api/auth" \
+curl -s -X POST "http://localhost:8080/api/auth" \
   -H "Content-Type: application/json" \
-  -d '{
-    "username": "martin_perez",
-    "password": "SecurePassword123*"
-  }'
+  -d '{"username":"admin","password":"Admin123*"}'
 ```
-**Respuesta:** `200 OK`
+
+**Respuesta `200 OK`:**
 ```json
 {
-  "username": "martin_perez",
-  "message": "User logged successfully",
-  "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3N1ZXIiOiJhdXRoLXNlcnZpY2UiLCJzdWIiOiJtYXJ0aW5fcGVyZXoiLCJ1c2VySWQiOjEyLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwiaWF0IjoxNzg0ODk3NjAwLCJleHAiOjE3ODQ5MDEyMDB9.s8...",
-  "status": true
+  "username": "admin",
+  "message": "Login successful",
+  "jwt": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJzdWIiOiJhZG1pbiIsInVzZXJJZCI6MSwiaWF0IjoxNzAwMDAwMDAwfQ...."
 }
 ```
+
+| Campo | Descripción |
+|---|---|
+| `username` | Usuario autenticado |
+| `message` | Siempre `"Login successful"` |
+| `jwt` | Token RS256 firmado — usarlo como `Authorization: Bearer <jwt>` |
+
+| Código | Body | Descripción |
+|---|---|---|
+| `200 OK` | Ver arriba | Login exitoso |
+| `401 Unauthorized` | `{"status":"UNAUTHORIZED","message":"Invalid username or password"}` | Credenciales incorrectas |
+
+#### Usuarios pre-cargados en la base de datos
+
+| Username | Password | Rol |
+|---|---|---|
+| `admin` | `123456` | `ADMIN` |
+| `usuario` | `123456` | `USER` |
 
 ---
 
@@ -78,9 +113,9 @@ curl -X POST "http://localhost:8080/api/auth" \
 * **Payload:**
 ```json
 {
-  "userId": 12,
-  "username": "martin_perez",
-  "email": "martin@example.com"
+  "userId": 1,
+  "phone": "+5491112345678",
+  "email": "juan@gmail.com"
 }
 ```
 

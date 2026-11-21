@@ -48,33 +48,52 @@ Microservicio enfocado en el procesamiento de eventos del dominio, auditoría de
 
 ---
 
-## 📡 Ejemplos de Peticiones y Respuestas
+## 📡 Endpoints y Ejemplos
 
-### 1. Consultar Notificaciones del Usuario (`GET /api/v1/notifications`)
-**Request:**
+> Requiere `Authorization: Bearer <jwt>`.
+> Las notificaciones se generan automáticamente por Kafka — este endpoint es de **solo lectura** (auditoría).
+
+---
+
+### `GET /api/v1/notifications` — Notificaciones del usuario autenticado
+
+Filtra por `X-User-Id` inyectado por el Gateway.
+
 ```bash
-curl -X GET "http://localhost:8080/api/v1/notifications" \
-  -H "Authorization: Bearer <TOKEN_JWT>"
+curl -s "http://localhost:8080/api/v1/notifications" \
+  -H "Authorization: Bearer <jwt>"
 ```
-**Respuesta:** `200 OK`
+
+**Respuesta `200 OK`:**
 ```json
 [
   {
-    "id": "f8c2b3a1-5d6e-7f8a-9b0c-1d2e3f4a5b6c",
-    "recipient": "martin@example.com",
-    "subject": "¡Tu pago ha sido aprobado! - ReservaYa",
+    "id": 1,
+    "userId": 1,
+    "sentTo": "juan@gmail.com",
+    "type": "BOOKING_CREATED",
     "status": "SENT",
-    "createdAt": "2026-11-14T15:15:30"
+    "createdAt": "2026-11-20T09:31:10"
   },
   {
-    "id": "a9b1c2d3-4e5f-6a7b-8c9d-0e1f2a3b4c5d",
-    "recipient": "martin@example.com",
-    "subject": "Solicitud de Reserva Recibida - ReservaYa",
+    "id": 2,
+    "userId": 1,
+    "sentTo": "juan@gmail.com",
+    "type": "PAYMENT_APPROVED",
     "status": "SENT",
-    "createdAt": "2026-11-14T15:15:02"
+    "createdAt": "2026-11-20T09:31:15"
   }
 ]
 ```
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | `Long` | ID de la notificación |
+| `userId` | `Long` | ID del usuario |
+| `sentTo` | `String` | Email o teléfono destino |
+| `type` | `Enum` | `BOOKING_CREATED` \| `PAYMENT_APPROVED` \| `PAYMENT_FAILED` \| `BOOKING_CANCELLED` |
+| `status` | `Enum` | `PENDING` \| `SENT` \| `FAILED` |
+| `createdAt` | `LocalDateTime` | Timestamp de creación |
 
 ---
 
