@@ -87,6 +87,9 @@ La plataforma incluye diagramas exhaustivos para entornos de desarrollo y produc
 
 ## 📡 Referencia Rápida de Endpoints (vía API Gateway `:8080`)
 
+> 🚀 **Postman Collection lista para importar:** [`doc/Reserva_Ya.postman_collection.json`](doc/Reserva_Ya.postman_collection.json)  
+> Incluye todos los endpoints listos para probar contra el API Gateway (`{{host}}:{{port}}`) con script de guardado automático del token JWT en login.  
+> 
 > La documentación detallada de cada endpoint (request/response bodies, validaciones y ejemplos) está en el README de cada microservicio.
 
 ### 1. Autenticación (`auth-service`) — Sin JWT → [`auth-service/README.md`](auth-service/README.md)
