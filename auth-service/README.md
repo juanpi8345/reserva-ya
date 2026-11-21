@@ -74,7 +74,7 @@ curl -s -X POST "http://localhost:8080/api/auth/register" \
 ```bash
 curl -s -X POST "http://localhost:8080/api/auth" \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"Admin123*"}'
+  -d '{"username":"admin","password":"123456"}'
 ```
 
 **Respuesta `200 OK`:**

@@ -96,7 +96,7 @@ La plataforma incluye diagramas exhaustivos para entornos de desarrollo y produc
 | `POST` | `/api/auth/register` | Registra nuevo usuario | `200 OK` (vacío) |
 | `POST` | `/api/auth` | Login — devuelve JWT | `200 OK` + `{username, message, jwt}` |
 
-**Usuarios pre-cargados:** `admin / Admin123*` (ADMIN), `usuario / 12345678` (USER), `lucas_dev / 12345678` (USER)
+**Usuarios pre-cargados:** `admin / 123456` (ADMIN), `usuario / 123456` (USER)
 
 ### 2. Reservas (`booking-service`) — Requiere JWT → [`booking-service/README.md`](booking-service/README.md)
 

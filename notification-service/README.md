@@ -18,7 +18,7 @@ Microservicio enfocado en el procesamiento de eventos del dominio, auditoría de
 
 > 📊 **Diagramas de Arquitectura:** Consultá la interacción en el flujo asíncrono en [General Architecture Diagram](../doc/General%20achitecture.png) y [Kafka Development Architecture](../doc/Kafka%20development%20architecture.png).
 3. **Plantillas HTML en AWS S3 con Caché Redis:**
-   - Descarga dinámica de plantillas (`welcome.html`, `booking_created.html`, `payment_approved.html`, `payment_failed.html`, `booking_cancelled.html`) desde bucket S3.
+   - Descarga dinámica de plantillas (`booking_created.html`, `payment_approved.html`, `payment_failed.html`, `booking_cancelled.html`) desde bucket S3.
    - Caché de alto rendimiento con `@Cacheable(value = "emailTemplates", key = "#templateName")` implementado en `TemplateStorageService` para evitar I/O redundante hacia S3.
 4. **Motor de Renderizado Thymeleaf:**
    - Reemplazo dinámico de variables en plantillas en memoria con `SpringTemplateEngine` y `StringTemplateResolver`.
