@@ -51,11 +51,11 @@ El ecosistema implementa una **Saga Coreografiada** asíncrona sobre Apache Kafk
 
 | Servicio | Puerto | Base de Datos / Storage | Descripción |
 |---|---|---|---|
-| **[`api-gateway`](api-gateway/README.md)** | `8080` | Memoria (Resilience4j) | Reverse Proxy, Rate Limiter, validación JWT e inyección de `X-User-Id` |
-| **[`eureka-server`](eureka-server/README.md)** | `8761` | Memoria | Dashboard y Registro dinámico de microservicios |
+| **[`api-gateway`](api-gateway/README.md)** | `8080` | - | Reverse Proxy, Rate Limiter, validación JWT e inyección de `X-User-Id` |
+| **[`eureka-server`](eureka-server/README.md)** | `8761` | - | Dashboard y Registro dinámico de microservicios |
 | **[`auth-service`](auth-service/README.md)** | `8085` | PostgreSQL (`auth_db`) | Registro de usuarios, login, JWT y evento `user.created` |
 | **[`booking-service`](booking-service/README.md)** | `8081` | PostgreSQL (`booking_db`) + Redis | Core de reservas, validación de fechas y Saga `booking.created` |
-| **[`payment-service`](payment-service/README.md)** | `8082` | PostgreSQL (`payment_db`) | Cobro asíncrono, eventos `payment.approved` / `payment.failed` |
+| **[`payment-service`](payment-service/README.md)** | `8082` | PostgreSQL (`payment_db`) + Redis | Cobro asíncrono, eventos `payment.approved` / `payment.failed` |
 | **[`notification-service`](notification-service/README.md)** | `8083` | PostgreSQL (`notification_db`) + Redis + S3 | Patrón Strategy, templates S3 en caché y envio de emails |
 
 ---
