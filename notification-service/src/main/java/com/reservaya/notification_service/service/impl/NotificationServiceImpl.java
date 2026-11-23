@@ -49,7 +49,6 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setType(eventType);
         notification.setUserId(context.getUserId());
         notification.setIdempotencyKey(idempotencyKey);
-        notification.setPayload(serializePayload(context));
 
         UserContact contact = userContactService.getUserContact(context.getUserId());
 
@@ -65,6 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
         strategy.sendNotification(context);
 
         notification.setSentTo(contact.getEmail());
+        notification.setPayload(serializePayload(context));
         notification.setStatus(NotificationStatus.SENT);
         notificationRepository.save(notification);
     }
