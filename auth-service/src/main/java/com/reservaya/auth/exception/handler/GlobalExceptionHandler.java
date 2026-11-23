@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +26,15 @@ public class GlobalExceptionHandler {
 	    return ResponseEntity
 	            .status(HttpStatus.CONFLICT)
 	            .body(new ErrorResponse(HttpStatus.CONFLICT,ex.getMessage()));
+	}
+	
+	@ExceptionHandler(UsernameNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleBadCredentialsException(
+			UsernameNotFoundException ex) {
+
+	    return ResponseEntity
+	            .status(HttpStatus.UNAUTHORIZED)
+	            .body(new ErrorResponse(HttpStatus.UNAUTHORIZED,ex.getMessage()));
 	}
 	
 	@ExceptionHandler(BadCredentialsException.class)

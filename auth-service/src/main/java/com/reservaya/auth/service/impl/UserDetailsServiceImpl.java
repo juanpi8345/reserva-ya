@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		UserSec userSec = userRepository.findByUsername(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+				.orElseThrow(() -> new UsernameNotFoundException("Invalid username or password"));
 		Role role = userSec.getRole();
 		
 		List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
