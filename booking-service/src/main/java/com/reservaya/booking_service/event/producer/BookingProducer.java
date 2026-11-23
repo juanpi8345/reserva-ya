@@ -26,39 +26,17 @@ public class BookingProducer {
 	@Value("${app.kafka.topics.booking-cancelled.name:booking.cancelled}")
 	private String bookingCancelledTopic;
 
-	public void sendBookingCreated(BookingCreatedEvent event) {
+	public CompletableFuture<SendResult<String, Object>> sendBookingCreated(BookingCreatedEvent event) {
 		String key = event.getBookingId().toString();
 		log.info("Publicando evento BookingCreatedEvent con key={} en tópico={}", key, bookingCreatedTopic);
 
-		CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(bookingCreatedTopic, key, event);
-
-		future.whenComplete((result, ex) -> {
-			if (ex != null) {
-				log.error("Error al publicar BookingCreatedEvent para bookingId={}: {}", key, ex.getMessage(), ex);
-			} else {
-				log.info("BookingCreatedEvent publicado con éxito. Tópico={}, Partición={}, Offset={}",
-						result.getRecordMetadata().topic(),
-						result.getRecordMetadata().partition(),
-						result.getRecordMetadata().offset());
-			}
-		});
+		return kafkaTemplate.send(bookingCreatedTopic, key, event);
 	}
 
-	public void sendBookingCancelled(BookingCancelledEvent event) {
+	public CompletableFuture<SendResult<String, Object>> sendBookingCancelled(BookingCancelledEvent event) {
 		String key = event.getBookingId().toString();
 		log.info("Publicando evento BookingCancelledEvent con key={} en tópico={}", key, bookingCancelledTopic);
 
-		CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(bookingCancelledTopic, key, event);
-
-		future.whenComplete((result, ex) -> {
-			if (ex != null) {
-				log.error("Error al publicar BookingCancelledEvent para bookingId={}: {}", key, ex.getMessage(), ex);
-			} else {
-				log.info("BookingCancelledEvent publicado con éxito. Tópico={}, Partición={}, Offset={}",
-						result.getRecordMetadata().topic(),
-						result.getRecordMetadata().partition(),
-						result.getRecordMetadata().offset());
-			}
-		});
+		return kafkaTemplate.send(bookingCancelledTopic, key, event);
 	}
 }

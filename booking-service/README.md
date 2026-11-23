@@ -11,8 +11,9 @@ Microservicio central (Core de Negocio) encargado de la gestión de reservas de 
    - Cancelación de reservas con emisión de eventos de compensación.
 2. **Validación de Solapamiento Temporal:**
    - Valida que el recurso solicitado (`HOTEL` o `FLIGHT`) no posea reservas solapadas en el mismo rango de fechas para reservas en estado activo (`PENDING`, `CONFIRMED`).
-3. **Inicio de Saga Coreografiada:**
-   - Al crearse una reserva, se persiste con estado `PENDING` y se emite de inmediato el evento `BookingCreatedEvent` hacia Kafka en el tópico `booking.created`.
+3. **Inicio de Saga Coreografiada con Transactional Outbox:**
+   - Al crearse o cancelarse una reserva, el cambio de estado y el evento se guardan de forma atómica en la base de datos dentro de la tabla `outbox_events`.
+   - Un scheduler desacoplado con concurrencia segura (`FOR UPDATE SKIP LOCKED`) procesa los eventos y los emite a Kafka (`booking.created`, `booking.cancelled`), garantizando entrega *at-least-once* incluso ante caídas del broker.
 4. **Consumo de Eventos de Pago (Saga Callback):**
    - Escucha los tópicos `payment.approved` y `payment.failed`.
    - Si el pago es aprobado, actualiza el estado de la reserva a `CONFIRMED`.

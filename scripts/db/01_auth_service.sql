@@ -40,6 +40,20 @@ CREATE TABLE IF NOT EXISTS users (
         FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE SET NULL
 );
 
+-- 3. TABLA OUTBOX_EVENTS (Transactional Outbox Pattern)
+CREATE TABLE IF NOT EXISTS outbox_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_type VARCHAR(100) NOT NULL,
+    partition_key INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    payload TEXT NOT NULL,
+    retry_count INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP WITHOUT TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_outbox_status_created ON outbox_events(status, created_at);
+
 -- 2. ROLES Y PERMISOS INICIALES
 INSERT INTO permissions (permission_name) 
 VALUES ('READ'), ('SAVE'), ('UPDATE'), ('DELETE')

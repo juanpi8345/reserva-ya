@@ -11,19 +11,23 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.reservaya.payment_service.entity.OutboxEvent;
 import com.reservaya.payment_service.entity.Payment;
 import com.reservaya.payment_service.event.model.BookingCreatedEvent;
 import com.reservaya.payment_service.event.model.PaymentEvent;
-import com.reservaya.payment_service.event.producer.PaymentProducer;
 import com.reservaya.payment_service.exception.PaymentNotFoundException;
+import com.reservaya.payment_service.model.EventType;
 import com.reservaya.payment_service.model.GetPaymentResponse;
+import com.reservaya.payment_service.model.OutboxStatus;
 import com.reservaya.payment_service.model.PaymentStatus;
+import com.reservaya.payment_service.repository.OutboxEventRepository;
 import com.reservaya.payment_service.repository.PaymentRepository;
 import com.reservaya.payment_service.service.PaymentService;
 import com.reservaya.payment_service.util.Constants;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service
@@ -31,8 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentServiceImpl implements PaymentService {
 
 	private final PaymentRepository paymentRepository;
-	private final PaymentProducer paymentProducer;
-
+	private final ObjectMapper objectMapper;
+	private final OutboxEventRepository outboxEventRepository;
 
 	@Transactional
 	@Caching(evict = {
@@ -73,8 +77,16 @@ public class PaymentServiceImpl implements PaymentService {
 				.userId(event.getUserId())
 				.paymentStatus(paymentStatus)
 				.build();
+		
+		EventType eventType = PaymentStatus.APPROVED.equals(paymentStatus) ?
+											EventType.PAYMENT_APPROVED : EventType.PAYMENT_FAILED;
+		
+		OutboxEvent outboxEvent = OutboxEvent.builder().eventType(eventType)
+				.partitionKey(savedPayment.getId()).status(OutboxStatus.PENDING)
+				.payload(objectMapper.writeValueAsString(paymentEvent))
+				.build();
 
-		paymentProducer.sendPaymentEvent(paymentEvent,paymentStatus);
+		outboxEventRepository.save(outboxEvent);
 	}
 
 	@Cacheable(value = "payments", key = "'all'")

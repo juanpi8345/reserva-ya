@@ -8,14 +8,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.reservaya.auth.entity.OutboxEvent;
 import com.reservaya.auth.entity.Role;
 import com.reservaya.auth.entity.UserSec;
 import com.reservaya.auth.event.model.UserCreatedEvent;
-import com.reservaya.auth.event.producer.UserProducer;
 import com.reservaya.auth.exception.UsernameAlreadyExistsException;
 import com.reservaya.auth.model.AuthLoginRequest;
 import com.reservaya.auth.model.AuthLoginResponse;
 import com.reservaya.auth.model.AuthRegisterRequest;
+import com.reservaya.auth.model.EventType;
+import com.reservaya.auth.model.OutboxStatus;
+import com.reservaya.auth.repository.OutboxEventRepository;
 import com.reservaya.auth.repository.RoleRepository;
 import com.reservaya.auth.repository.UserRepository;
 import com.reservaya.auth.security.CustomUserDetails;
@@ -25,6 +28,7 @@ import com.reservaya.auth.utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 @Service
@@ -35,7 +39,8 @@ public class AuthServiceImpl implements AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final RoleRepository roleRepository;
 	private final UserRepository userRepository;
-	private final UserProducer userProducer;
+	private final ObjectMapper objectMapper;
+	private final OutboxEventRepository outboxEventRepository;
 	
 	@Override
 	public AuthLoginResponse login(@Valid AuthLoginRequest userRequest) {
@@ -73,6 +78,12 @@ public class AuthServiceImpl implements AuthService {
 		
 		UserCreatedEvent userCreatedEvent =
 				new UserCreatedEvent(savedUser.getId(), userRequest.phone(), userRequest.email());
-		userProducer.sendUserCreatedEvent(userCreatedEvent);
+		
+		OutboxEvent event = OutboxEvent.builder().eventType(EventType.USER_CREATED)
+				.partitionKey(userSec.getId()).status(OutboxStatus.PENDING)
+				.payload(objectMapper.writeValueAsString(userCreatedEvent))
+				.build();
+		
+		outboxEventRepository.save(event);
 	}
 }

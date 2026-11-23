@@ -10,10 +10,10 @@ import com.reservaya.booking_service.model.CreateBookingResponse;
 
 public interface BookingService {
 
-	CreateBookingResponse publishCreatedBookingEvent(Long userId, CreateBookingRequest request);
+	CreateBookingResponse createBooking(Long userId, CreateBookingRequest request);
 	BookingResponse getBookingById(UUID id);
 	List<BookingResponse> getUserBookings(Long userId);
 	List<BookingResponse> getBookings();
-	void publishCancelledBookingEvent(UUID id, Long userId);
+	void cancelBooking(UUID id, Long userId);
 	void processBookingPayment(PaymentEvent paymentEvent);
 }

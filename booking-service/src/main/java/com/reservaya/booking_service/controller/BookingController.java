@@ -32,7 +32,7 @@ public class BookingController {
 	@PostMapping
 	public ResponseEntity<CreateBookingResponse> createBooking(@RequestBody @Valid CreateBookingRequest request,
 																@RequestHeader("X-User-Id") Long userId) {
-		CreateBookingResponse response = bookingService.publishCreatedBookingEvent(userId, request);
+		CreateBookingResponse response = bookingService.createBooking(userId, request);
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
 	}
 	
@@ -57,7 +57,7 @@ public class BookingController {
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> cancelUserBooking(@RequestHeader("X-User-Id") Long userId, @PathVariable UUID id){
-		bookingService.publishCancelledBookingEvent(id, userId);
+		bookingService.cancelBooking(id, userId);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 }

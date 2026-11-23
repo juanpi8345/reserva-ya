@@ -93,7 +93,14 @@ No existe un orquestador centralizado. Los servicios avanzan el flujo de negocio
     └──► [notification-service] ──(envía email: payment_failed)
 ```
 
-### 2. Proyección Local de Datos (Local Data Projection)
+### 2. Patrón Transactional Outbox (Garantía At-Least-Once Delivery)
+Para evitar el problema de *Dual Write* y garantizar que ningún evento se pierda si Kafka está temporalmente caído o bajo latencia:
+- Cada microservicio productor (`auth-service`, `booking-service`, `payment-service`) **no emite directamente a Kafka en el hilo HTTP/evento**.
+- En la **misma transacción relacional ACID** donde persiste su entidad de negocio, inserta un registro en la tabla `outbox_events` con estado `PENDING`.
+- Un scheduler en segundo plano lee los eventos pendientes usando **`FOR UPDATE SKIP LOCKED`** (permitiendo escalado horizontal multi-instancia sin colisiones ni locks cruzados).
+- Los eventos se emiten a Kafka y se actualizan a `PUBLISHED` (o `FAILED` si superan `max-retries`).
+
+### 3. Proyección Local de Datos (Local Data Projection)
 Para evitar que `notification-service` consulte por HTTP a `auth-service` cada vez que necesita enviar un correo:
 - Al registrarse un usuario, `auth-service` publica `user.created`.
 - `notification-service` consume el evento y almacena localmente una copia en su tabla `user_contacts` y en Redis.

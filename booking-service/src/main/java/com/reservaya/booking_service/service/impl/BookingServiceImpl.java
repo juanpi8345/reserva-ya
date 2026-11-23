@@ -12,10 +12,10 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.reservaya.booking_service.entity.Booking;
+import com.reservaya.booking_service.entity.OutboxEvent;
 import com.reservaya.booking_service.event.model.BookingCancelledEvent;
 import com.reservaya.booking_service.event.model.BookingCreatedEvent;
 import com.reservaya.booking_service.event.model.PaymentEvent;
-import com.reservaya.booking_service.event.producer.BookingProducer;
 import com.reservaya.booking_service.exception.BookingNotAvailableException;
 import com.reservaya.booking_service.exception.BookingNotFoundException;
 import com.reservaya.booking_service.exception.InvalidBookingDatesException;
@@ -23,29 +23,34 @@ import com.reservaya.booking_service.model.BookingResponse;
 import com.reservaya.booking_service.model.BookingStatus;
 import com.reservaya.booking_service.model.CreateBookingRequest;
 import com.reservaya.booking_service.model.CreateBookingResponse;
+import com.reservaya.booking_service.model.EventType;
+import com.reservaya.booking_service.model.OutboxStatus;
 import com.reservaya.booking_service.model.PaymentStatus;
 import com.reservaya.booking_service.model.ResourceType;
 import com.reservaya.booking_service.repository.BookingRepository;
+import com.reservaya.booking_service.repository.OutboxEventRepository;
 import com.reservaya.booking_service.service.BookingService;
 import com.reservaya.booking_service.util.Constants;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
-	private final BookingProducer bookingProducer;
 	private final BookingRepository bookingRepository;
+	private final OutboxEventRepository outboxEventRepository;
+	private final ObjectMapper objectMapper;
 
-	@Caching(evict = {@CacheEvict(value = "allBookings", key = "'all'"),
+	@Caching(evict = { @CacheEvict(value = "allBookings", key = "'all'"),
 			@CacheEvict(value = "userBookings", key = "#userId") })
 	@Transactional
 	@Override
-	public CreateBookingResponse publishCreatedBookingEvent(Long userId, CreateBookingRequest request) {
+	public CreateBookingResponse createBooking(Long userId, CreateBookingRequest request) {
 		Booking booking = new Booking();
 		LocalDateTime checkIn = request.getCheckIn();
 		LocalDateTime checkOut = request.getCheckOut();
@@ -69,7 +74,12 @@ public class BookingServiceImpl implements BookingService {
 				.bookingId(savedBooking.getId()).createdAt(LocalDateTime.now()).resourceId(resourceId)
 				.totalAmount(totalAmount).userId(userId).resourceType(resourceType).build();
 
-		bookingProducer.sendBookingCreated(createdEvent);
+		OutboxEvent event = OutboxEvent.builder().eventType(EventType.BOOKING_CREATED)
+				.partitionKey(savedBooking.getId()).status(OutboxStatus.PENDING)
+				.payload(objectMapper.writeValueAsString(createdEvent))
+				.build();
+
+		outboxEventRepository.save(event);
 
 		return new CreateBookingResponse(savedBooking.getId(), savedBooking.getStatus());
 	}
@@ -106,13 +116,10 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Transactional
-	@Caching(evict = { 
-			@CacheEvict(value = "bookings", key = "#id"),
-			@CacheEvict(value = "userBookings", key = "#userId"), 
-			@CacheEvict(value = "allBookings", key = "'all'") 
-			})
+	@Caching(evict = { @CacheEvict(value = "bookings", key = "#id"),
+			@CacheEvict(value = "userBookings", key = "#userId"), @CacheEvict(value = "allBookings", key = "'all'") })
 	@Override
-	public void publishCancelledBookingEvent(UUID id, Long userId) {
+	public void cancelBooking(UUID id, Long userId) {
 		Booking booking = bookingRepository.findByUserIdAndId(userId, id)
 				.orElseThrow(() -> new BookingNotFoundException(Constants.RESOURCE_NOT_FOUND));
 		if (BookingStatus.CANCELLED.equals(booking.getStatus()))
@@ -120,32 +127,39 @@ public class BookingServiceImpl implements BookingService {
 		booking.setStatus(BookingStatus.CANCELLED);
 
 		bookingRepository.save(booking);
+		
+		BookingCancelledEvent cancelledEvent = BookingCancelledEvent.builder()
+		        .bookingId(booking.getId())
+		        .userId(userId)
+		        .cancelledAt(LocalDateTime.now())
+		        .build();
 
-		BookingCancelledEvent cancelledEvent = BookingCancelledEvent.builder().bookingId(id)
-				.cancelledAt(LocalDateTime.now()).userId(userId).build();
+		OutboxEvent event = OutboxEvent.builder().eventType(EventType.BOOKING_CANCELLED).partitionKey(booking.getId())
+				.status(OutboxStatus.PENDING)
+				.payload(objectMapper.writeValueAsString(cancelledEvent))
+				.build();
 
-		bookingProducer.sendBookingCancelled(cancelledEvent);
+		outboxEventRepository.save(event);
 	}
 
 	@Transactional
-	@Caching(evict = { 
-			@CacheEvict(value = "bookings", key = "#paymentEvent.getBookingId()"),
-			@CacheEvict(value = "userBookings", key = "#paymentEvent.getUserId()"), 
-			@CacheEvict(value = "allBookings", key = "'all'") 
-			})
+	@Caching(evict = { @CacheEvict(value = "bookings", key = "#paymentEvent.getBookingId()"),
+			@CacheEvict(value = "userBookings", key = "#paymentEvent.getUserId()"),
+			@CacheEvict(value = "allBookings", key = "'all'") })
 	@Override
 	public void processBookingPayment(PaymentEvent paymentEvent) {
 		Booking booking = bookingRepository.findByUserIdAndId(paymentEvent.getUserId(), paymentEvent.getBookingId())
 				.orElseThrow(() -> new BookingNotFoundException(Constants.RESOURCE_NOT_FOUND));
-		
-		if(!BookingStatus.PENDING.equals(booking.getStatus())) {
+
+		if (!BookingStatus.PENDING.equals(booking.getStatus())) {
 			log.warn("El pago para bookingId={} ya fue procesado con anterioridad. Ignorando evento duplicado.",
 					booking.getId());
 			return;
 		}
-		
-		BookingStatus bookingStatus = PaymentStatus.APPROVED.equals(paymentEvent.getPaymentStatus()) ? 
-												BookingStatus.CONFIRMED : BookingStatus.PAYMENT_FAILED;
+
+		BookingStatus bookingStatus = PaymentStatus.APPROVED.equals(paymentEvent.getPaymentStatus())
+				? BookingStatus.CONFIRMED
+				: BookingStatus.PAYMENT_FAILED;
 		booking.setStatus(bookingStatus);
 		bookingRepository.save(booking);
 	}

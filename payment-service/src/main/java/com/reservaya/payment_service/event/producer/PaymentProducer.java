@@ -26,24 +26,13 @@ public class PaymentProducer {
 	@Value("${app.kafka.topics.payment-failed.name}")
 	private String paymentFailedTopic;
 
-	public void sendPaymentEvent(PaymentEvent event, PaymentStatus paymentStatus) {
+	public CompletableFuture<SendResult<String, Object>> sendPaymentEvent(PaymentEvent event) {
 		String key = event.getBookingId().toString();
-		String paymentTopic = PaymentStatus.APPROVED.equals(paymentStatus) ?
+		String paymentTopic = PaymentStatus.APPROVED.equals(event.getPaymentStatus()) ?
 												paymentApprovedTopic : paymentFailedTopic;
 		log.info("Publicando evento PaymentEvent para bookingId={} en tópico={}", key, paymentTopic);
 
-		CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(paymentTopic, key, event);
-
-		future.whenComplete((result, ex) -> {
-			if (ex != null) {
-				log.error("Error al publicar PaymentEvent para bookingId={} en tópico={}: {}", key, paymentTopic, ex.getMessage(), ex);
-			} else {
-				log.info("PaymentEvent publicado con éxito. Tópico={}, Partición={}, Offset={}",
-						result.getRecordMetadata().topic(),
-						result.getRecordMetadata().partition(),
-						result.getRecordMetadata().offset());
-			}
-		});
+		return kafkaTemplate.send(paymentTopic, key, event);
 	}
 
 }

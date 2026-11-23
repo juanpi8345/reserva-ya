@@ -22,23 +22,12 @@ public class UserProducer {
 	@Value("${app.kafka.topics.user-created.name:user.created}")
 	private String userCreatedTopicName;
 
-	public void sendUserCreatedEvent(UserCreatedEvent event) {
+	public CompletableFuture<SendResult<String, Object>> sendUserCreatedEvent(UserCreatedEvent event) {
 		String key = event.userId().toString();
 		
 		log.info("Publicando evento UserCreatedEvent para userId={} en tópico={}", key, userCreatedTopicName);
 
-		CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(userCreatedTopicName, key, event);
-
-		future.whenComplete((result, ex) -> {
-			if (ex != null) {
-				log.error("Error al publicar UserCreatedEvent para userId={}: {}", key, ex.getMessage(), ex);
-			} else {
-				log.info("UserCreatedEvent publicado con éxito. Tópico={}, Partición={}, Offset={}",
-						result.getRecordMetadata().topic(),
-						result.getRecordMetadata().partition(),
-						result.getRecordMetadata().offset());
-			}
-		});
+		return kafkaTemplate.send(userCreatedTopicName, key, event);
 	}
 
 }

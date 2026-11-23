@@ -66,3 +66,7 @@ app:
         name: ${TOPIC_PAYMENT_APPROVED_NAME:payment.approved}
       payment-failed:
         name: ${TOPIC_PAYMENT_FAILED_NAME:payment.failed}
+    outbox:
+      max-retries: ${OUTBOX_MAX_RETRIES:10}
+      scheduler:
+        fixed-delay-ms: ${OUTBOX_SCHEDULER_FIXED_DELAY_MS:2000}

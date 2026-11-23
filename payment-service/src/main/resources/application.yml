@@ -62,3 +62,7 @@ app:
         name: ${TOPIC_PAYMENT_FAILED_NAME:payment.failed}
         partitions: ${TOPIC_PAYMENT_FAILED_PARTITIONS:3}
         replicas: ${TOPIC_PAYMENT_FAILED_REPLICAS:1}
+    outbox:
+      max-retries: ${OUTBOX_MAX_RETRIES:10}
+      scheduler:
+        fixed-delay-ms: ${OUTBOX_SCHEDULER_FIXED_DELAY_MS:2000}

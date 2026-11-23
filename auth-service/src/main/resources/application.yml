@@ -40,6 +40,10 @@ app:
         name: ${TOPIC_USER_CREATED:user.created}
         partitions: ${TOPIC_USER_CREATED_PARTITIONS:3}
         replicas: ${TOPIC_USER_CREATED_REPLICAS:1}
+    outbox:
+      max-retries: ${OUTBOX_MAX_RETRIES:10}
+      scheduler:
+        fixed-delay-ms: ${OUTBOX_SCHEDULER_FIXED_DELAY_MS:2000}
 eureka:
   client:
     service-url:
